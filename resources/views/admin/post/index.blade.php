@@ -80,6 +80,9 @@
                                     <td>{{ $post->created_at }}</td>
                                     <td>{{ $post->updated_at }}</td>
                                     <td class="text-center">
+                                        <a href="{{route('admin.post.show', $post->id)}}" class="btn btn-primary waves-effect">
+                                            <i class="material-icons">slideshow</i>
+                                        </a>
                                         <a href="{{route('admin.post.edit', $post->id)}}" class="btn btn-info waves-effect">
                                             <i class="material-icons">edit</i>
                                         </a>
