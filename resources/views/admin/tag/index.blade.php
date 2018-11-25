@@ -23,7 +23,8 @@
             <div class="card">
                 <div class="header">
                     <h2>
-                        TAGS TABLE
+                        ALL TAGS 
+                        <span class="badge bg-blue">{{ $tags->count() }}</span>
                     </h2>
                     
                 </div>
@@ -34,6 +35,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
+                                    <th>Post count</th>
                                     <th>Created At</th>
                                     <th>Updated At</th>
                                     <th class="text-center">Action</th>
@@ -43,6 +45,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
+                                    <th>Post count</th>
                                     <th>Created At</th>
                                     <th>Updated At</th>
                                     <th class="text-center">Action</th>
@@ -53,6 +56,7 @@
                                 <tr>
                                     <td>{{ $key + 1 }}</td>
                                     <td>{{ $tag->name }}</td>
+                                    <td>{{ $tag->posts->count() }}</td>
                                     <td>{{ $tag->created_at }}</td>
                                     <td>{{ $tag->updated_at }}</td>
                                     <td class="text-center">
