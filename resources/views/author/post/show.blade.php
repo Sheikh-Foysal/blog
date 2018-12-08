@@ -13,17 +13,11 @@
         <div class="clearfix">
             <a href="{{ route('admin.post.index') }}" class="btn btn-danger waves-effect">Back</a>
             @if($post->is_approved == false)
-            <button type="button" class="btn btn-success waves-effect pull-right" onclick="approvePost({{$post->id}})">
+            <button type="button" class="btn btn-success pull-right">
                 <i class="material-icons">done</i>
                 <span>Approve</span>
             </button>
-            <form action="{{ route('admin.post.approve',$post->id) }}" method="post" id="approval-form" style="display:none;">
-                @csrf
-                @method('PUT')
-            </form>
-            
             @else
-            
             <button type="button" class="btn btn-success pull-right" disabled>
                 <i class="material-icons">done</i>
                 <span>Approved</span>
@@ -82,7 +76,7 @@
                             </div>
         
                             <div class="body">
-                               <img src="{{asset('storage/post'). '/' . $post->image }}" alt="" class="img-responsive thumbnail">
+                               <img src="{{ Storage::disk('public')->url('post/'.$post->image) }}" alt="" class="img-responsive thumbnail">
                             </div>
                         </div>
                     </div>
@@ -95,63 +89,25 @@
 @push('js')
     <script src="{{ asset('assets/backend/plugins/bootstrap-select/js/bootstrap-select.js') }}"></script>
     <script src="{{ asset('assets/backend/plugins/tinymce/tinymce.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.29.1/dist/sweetalert2.all.min.js"></script>
-
-    <script type="text/javascript">
-
-        $(function () {
-            //TinyMCE
-            tinymce.init({
-                selector: "textarea#tinymce",
-                theme: "modern",
-                height: 300,
-                plugins: [
-                    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
-                    'searchreplace wordcount visualblocks visualchars code fullscreen',
-                    'insertdatetime media nonbreaking save table contextmenu directionality',
-                    'emoticons template paste textcolor colorpicker textpattern imagetools'
-                ],
-                toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-                toolbar2: 'print preview media | forecolor backcolor emoticons',
-                image_advtab: true
-            });
-            tinymce.suffix = ".min";
-            tinyMCE.baseURL = '{{ asset('assets/backend/plugins/tinymce') }}';
+    <script>
+    $(function () {
+        //TinyMCE
+        tinymce.init({
+            selector: "textarea#tinymce",
+            theme: "modern",
+            height: 300,
+            plugins: [
+                'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+                'searchreplace wordcount visualblocks visualchars code fullscreen',
+                'insertdatetime media nonbreaking save table contextmenu directionality',
+                'emoticons template paste textcolor colorpicker textpattern imagetools'
+            ],
+            toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+            toolbar2: 'print preview media | forecolor backcolor emoticons',
+            image_advtab: true
         });
-
-        function approvePost(id){
-            // Approve Post
-            const swalWithBootstrapButtons = swal.mixin({
-            confirmButtonClass: 'btn btn-success',
-            cancelButtonClass: 'btn btn-danger',
-            buttonsStyling: false,
-            })
-
-            swalWithBootstrapButtons({
-            title: 'Are you sure ?',
-            text: "You want to approve this post!",
-            type: 'success',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Approve it!',
-            cancelButtonText: 'No, cancel!',
-            reverseButtons: true
-            }).then((result) => {
-            if (result.value) {
-                event.preventDefault();
-                document.getElementById('approval-form').submit();
-            } else if (
-                // Read more about handling dismissals
-                result.dismiss === swal.DismissReason.cancel
-            ) {
-                swalWithBootstrapButtons(
-                'Cancelled',
-                'The post is not approved!',
-                'info'
-                )
-            }
-            })
-        }
-
-
+        tinymce.suffix = ".min";
+        tinyMCE.baseURL = '{{ asset('assets/backend/plugins/tinymce') }}';
+    });
     </script>
 @endpush

@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Author;
+
 
 use App\Post;
 use Illuminate\Http\Request;
@@ -13,11 +14,9 @@ use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
 
 use Brian2694\Toastr\Facades\Toastr;
-use App\Notifications\AuthorPostApproved;
-use App\Subscriber;
+use App\User;
 use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewPostNotify;
-
+use App\Notifications\NewAuthorPost;
 
 class PostController extends Controller
 {
@@ -28,8 +27,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::latest()->get();
-        return view('admin.post.index', compact('posts'));
+        $posts = Auth::User()->posts()->latest()->get();
+        return view('author.post.index', compact('posts'));
     }
 
     /**
@@ -41,7 +40,7 @@ class PostController extends Controller
     {
         $categories = Category::all();
         $tags = Tag::all();
-        return view('admin.post.create', compact('categories', 'tags'));
+        return view('author.post.create', compact('categories', 'tags'));
     }
 
     /**
@@ -89,21 +88,17 @@ class PostController extends Controller
         }else{
             $post->status = false;
         }
-        $post->is_approved = true;
+        $post->is_approved = false;
         $post->save();
 
         $post->categories()->attach($request->categories);
         $post->tags()->attach($request->tags);
 
-        $subscribers = Subscriber::all();
-        foreach($subscribers as $subscriber)
-        {
-            Notification::route('mail', $subscriber->email)
-                ->notify(new NewPostNotify($post));
-        }
+        $users = User::where('role_id',1)->get();
+        Notification::send($users, new NewAuthorPost($post));
 
         Toastr::success('Post Successfully Created :)' ,'Success');
-        return redirect()->route('admin.post.index');
+        return redirect()->route('author.post.index');
     }
 
     /**
@@ -114,7 +109,12 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return  view('admin.post.show', compact('post'));
+        if($post->user_id != Auth::id())
+        {
+            Toastr::error('You are not authorized to access this post' ,'Error');
+            return redirect()->back();
+        }
+        return  view('author.post.show', compact('post'));
     }
 
     /**
@@ -125,9 +125,15 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        if($post->user_id != Auth::id())
+        {
+            Toastr::error('You are not authorized to access this post' ,'Error');
+            return redirect()->back();
+        }
+
         $categories = Category::all();
         $tags = Tag::all();
-        return view('admin.post.edit', compact('categories', 'tags', 'post'));
+        return view('author.post.edit', compact('categories', 'tags', 'post'));
     }
 
     /**
@@ -139,7 +145,11 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        
+        if($post->user_id != Auth::id())
+        {
+            Toastr::error('You are not authorized to access this post' ,'Error');
+            return redirect()->back();
+        }
         $this->validate($request,[
             'title'=> 'required',
             'image'=> 'image',
@@ -188,38 +198,7 @@ class PostController extends Controller
         $post->tags()->sync($request->tags);
 
         Toastr::success('Post Successfully Updated :)' ,'Success');
-        return redirect()->route('admin.post.index');
-    }
-
-
-
-    public function pending()
-    {
-        $posts = Post::where('is_approved', false)->get();
-        return view('admin.post.pending', compact('posts'));
-        
-    }
-
-    public function approval($id){
-        $post = Post::find($id);
-        if($post->is_approved == false)
-        {
-            $post->is_approved = true;
-            $post->save();
-            $post->user->notify(new AuthorPostApproved($post));
-
-            $subscribers = Subscriber::all();
-            foreach($subscribers as $subscriber)
-            {
-                Notification::route('mail', $subscriber->email)
-                    ->notify(new NewPostNotify($post));
-            }
-            
-            Toastr::success('Post Successfully Approved :)' ,'Success');
-            return redirect()->back();
-        }else{
-            Toastr::success('This Post is alredy approved :)' ,'info');
-        }
+        return redirect()->route('author.post.index');
     }
 
     /**
@@ -230,14 +209,20 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-       if(Storage::disk('public')->exists('post/'.$post->image))
-       {
-            Storage::disk('public')->delete('post/'.$post->image);
-       }
-       $post->categories()->detach();
-       $post->tags()->detach();
-       $post->delete();
-       Toastr::success('Post Successfully Deleted :)' ,'Success');
-       return redirect()->route('admin.post.index');
+        if($post->user_id != Auth::id())
+        {
+            Toastr::error('You are not authorized to access this post' ,'Error');
+            return redirect()->back();
+        }
+        
+        if(Storage::disk('public')->exists('post/'.$post->image))
+        {
+             Storage::disk('public')->delete('post/'.$post->image);
+        }
+        $post->categories()->detach();
+        $post->tags()->detach();
+        $post->delete();
+        Toastr::success('Post Successfully Deleted :)' ,'Success');
+        return redirect()->route('author.post.index');
     }
 }

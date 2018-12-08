@@ -1,6 +1,6 @@
 @extends('layouts.backend.app')
 
-@section('title', 'Post')
+@section('title', 'Subscriber')
 
 @push('css')
     <link href="{{ asset('assets/backend/plugins/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css') }}" rel="stylesheet">
@@ -9,22 +9,15 @@
 @section('content')
 
 <div class="container-fluid">
-    <div class="block-header">
-        <h2 class="text-right">
-            <a href="{{ route('admin.post.create') }}" class="btn btn-primary waves-effect">
-                <i class="material-icons">add</i>
-                <span>Add New Post</span>
-            </a>
-        </h2>
-    </div>
+
     <!-- Exportable Table -->
     <div class="row clearfix">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="card">
                 <div class="header">
                     <h2>
-                        ALL POSTS 
-                        <span class="badge bg-blue">{{ $posts->count() }}</span>
+                        ALL SUBSCRIBERS 
+                        <span class="badge bg-blue">{{ $subscribers->count() }}</span>
                     </h2>
                     
                 </div>
@@ -34,63 +27,34 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Title</th>
-                                    <th>Author</th>
-                                    <th class="text-center"><i class="material-icons">visibility</i></th>
-                                    <th>Is Approved</th>
-                                    <th>Status</th>
+                                    <th>Email</th>
                                     <th>Created At</th>
                                     <th>Updated At</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tfoot>
-                                <th>ID</th>
-                                <th>Title</th>
-                                <th>Author</th>
-                                <th class="text-center"><i class="material-icons">visibility</i></th>
-                                <th>Is Approved</th>
-                                <th>Status</th>
-                                <th>Created At</th>
-                                <th>Updated At</th>
-                                <th class="text-center">Action</th>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </tfoot>
                             <tbody>
-                                @foreach($posts as $key=>$post)
+                                @foreach($subscribers as $key=>$subscriber)
                                 <tr>
                                     <td>{{ $key + 1 }}</td>
-                                    <td>{{ str_limit($post->title,'16') }}</td>
-                                    <td>{{ $post->user->name }}</td>
-                                    <td>{{ $post->view_count }}</td>
-                                    <td>
-                                        @if($post->is_approved == true)
-                                        <span class="badge bg-blue">Approved</span>
-                                        @else 
-                                        <span class="badge bg-pink">Pending</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($post->status == true)
-                                        <span class="badge bg-blue">Published</span>
-                                        @else 
-                                        <span class="badge bg-pink">Pending</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $post->created_at->toFormattedDateString() }}</td>
-                                    <td>{{ $post->updated_at->toFormattedDateString() }}</td>
+                                    <td>{{ $subscriber->email }}</td>
+                                    <td>{{ $subscriber->created_at }}</td>
+                                    <td>{{ $subscriber->updated_at }}</td>
                                     <td class="text-center">
-                                        <a href="{{route('admin.post.show', $post->id)}}" class="btn btn-primary waves-effect">
-                                            <i class="material-icons">slideshow</i>
-                                        </a>
-                                        <a href="{{route('admin.post.edit', $post->id)}}" class="btn btn-info waves-effect">
-                                            <i class="material-icons">edit</i>
-                                        </a>
-                                        <button class="btn btn-danger waves-effect" type="button" onclick="deletePost({{ $post->id }})">
+                                        <button class="btn btn-danger waves-effect" type="button" onclick="SubscriberTag({{ $subscriber->id }})">
                                             <i class="material-icons">delete</i>
                                         </button>
 
-                                        <form id="delete-form-{{$post->id}}" action="{{ route('admin.post.destroy', $post->id) }}" method="post" style="display:none;">
+                                        <form id="subscriber-form-{{$subscriber->id}}" action="{{ route('admin.subscriber.destroy', $subscriber->id) }}" method="post" style="display:none;">
                                         @csrf 
                                         @method('DELETE')
                                         </form>
@@ -138,36 +102,36 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.29.1/dist/sweetalert2.all.min.js"></script>
 
 <script type="text/javascript">
-    function deletePost(id){
+    function SubscriberTag(id){
         const swalWithBootstrapButtons = swal.mixin({
-        confirmButtonClass: 'btn btn-success',
-        cancelButtonClass: 'btn btn-danger',
-        buttonsStyling: false,
-        })
+  confirmButtonClass: 'btn btn-success',
+  cancelButtonClass: 'btn btn-danger',
+  buttonsStyling: false,
+})
 
-        swalWithBootstrapButtons({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'No, cancel!',
-        reverseButtons: true
-        }).then((result) => {
-        if (result.value) {
-            event.preventDefault();
-            document.getElementById('delete-form-'+id).submit();
-        } else if (
-            // Read more about handling dismissals
-            result.dismiss === swal.DismissReason.cancel
-        ) {
-            swalWithBootstrapButtons(
-            'Cancelled',
-            'Your imaginary file is safe :)',
-            'error'
-            )
-        }
-        })
+swalWithBootstrapButtons({
+  title: 'Are you sure?',
+  text: "You won't be able to revert this!",
+  type: 'warning',
+  showCancelButton: true,
+  confirmButtonText: 'Yes, delete it!',
+  cancelButtonText: 'No, cancel!',
+  reverseButtons: true
+}).then((result) => {
+  if (result.value) {
+    event.preventDefault();
+    document.getElementById('subscriber-form-'+id).submit();
+  } else if (
+    // Read more about handling dismissals
+    result.dismiss === swal.DismissReason.cancel
+  ) {
+    swalWithBootstrapButtons(
+      'Cancelled',
+      'Your imaginary file is safe :)',
+      'error'
+    )
+  }
+})
     }
 </script>
 @endpush

@@ -11,7 +11,7 @@
 <div class="container-fluid">
     <div class="block-header">
         <h2 class="text-right">
-            <a href="{{ route('admin.post.create') }}" class="btn btn-primary waves-effect">
+            <a href="{{ route('author.post.create') }}" class="btn btn-primary waves-effect">
                 <i class="material-icons">add</i>
                 <span>Add New Post</span>
             </a>
@@ -80,17 +80,34 @@
                                     <td>{{ $post->created_at->toFormattedDateString() }}</td>
                                     <td>{{ $post->updated_at->toFormattedDateString() }}</td>
                                     <td class="text-center">
-                                        <a href="{{route('admin.post.show', $post->id)}}" class="btn btn-primary waves-effect">
+
+                                        @if($post->is_approved == false)
+                                        <button type="button" class="btn btn-success waves-effect" onclick="approvePost({{$post->id}})">
+                                            <i class="material-icons">done</i>
+                                        </button>
+                                        <form action="{{ route('admin.post.approve',$post->id) }}" method="post" id="approval-form" style="display:none;">
+                                            @csrf
+                                            @method('PUT')
+                                        </form>
+                                        
+                                        @else
+                                        
+                                        <button type="button" class="btn btn-success" disabled>
+                                            <i class="material-icons">done</i>
+                                        </button>
+                                        @endif
+
+                                        <a href="{{route('author.post.show', $post->id)}}" class="btn btn-primary waves-effect">
                                             <i class="material-icons">slideshow</i>
                                         </a>
-                                        <a href="{{route('admin.post.edit', $post->id)}}" class="btn btn-info waves-effect">
+                                        <a href="{{route('author.post.edit', $post->id)}}" class="btn btn-info waves-effect">
                                             <i class="material-icons">edit</i>
                                         </a>
                                         <button class="btn btn-danger waves-effect" type="button" onclick="deletePost({{ $post->id }})">
                                             <i class="material-icons">delete</i>
                                         </button>
 
-                                        <form id="delete-form-{{$post->id}}" action="{{ route('admin.post.destroy', $post->id) }}" method="post" style="display:none;">
+                                        <form id="delete-form-{{$post->id}}" action="{{ route('author.post.destroy', $post->id) }}" method="post" style="display:none;">
                                         @csrf 
                                         @method('DELETE')
                                         </form>
@@ -169,5 +186,39 @@
         }
         })
     }
+
+    function approvePost(id){
+        // Approve Post
+        const swalWithBootstrapButtons = swal.mixin({
+        confirmButtonClass: 'btn btn-success',
+        cancelButtonClass: 'btn btn-danger',
+        buttonsStyling: false,
+        })
+
+        swalWithBootstrapButtons({
+        title: 'Are you sure ?',
+        text: "You want to approve this post!",
+        type: 'success',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Approve it!',
+        cancelButtonText: 'No, cancel!',
+        reverseButtons: true
+        }).then((result) => {
+        if (result.value) {
+            event.preventDefault();
+            document.getElementById('approval-form').submit();
+        } else if (
+            // Read more about handling dismissals
+            result.dismiss === swal.DismissReason.cancel
+        ) {
+            swalWithBootstrapButtons(
+            'Cancelled',
+            'The post is not approved!',
+            'info'
+            )
+        }
+        })
+    }
+
 </script>
 @endpush

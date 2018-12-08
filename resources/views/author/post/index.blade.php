@@ -11,7 +11,7 @@
 <div class="container-fluid">
     <div class="block-header">
         <h2 class="text-right">
-            <a href="{{ route('admin.post.create') }}" class="btn btn-primary waves-effect">
+            <a href="{{ route('author.post.create') }}" class="btn btn-primary waves-effect">
                 <i class="material-icons">add</i>
                 <span>Add New Post</span>
             </a>
@@ -80,17 +80,17 @@
                                     <td>{{ $post->created_at->toFormattedDateString() }}</td>
                                     <td>{{ $post->updated_at->toFormattedDateString() }}</td>
                                     <td class="text-center">
-                                        <a href="{{route('admin.post.show', $post->id)}}" class="btn btn-primary waves-effect">
+                                        <a href="{{route('author.post.show', $post->id)}}" class="btn btn-primary waves-effect">
                                             <i class="material-icons">slideshow</i>
                                         </a>
-                                        <a href="{{route('admin.post.edit', $post->id)}}" class="btn btn-info waves-effect">
+                                        <a href="{{route('author.post.edit', $post->id)}}" class="btn btn-info waves-effect">
                                             <i class="material-icons">edit</i>
                                         </a>
                                         <button class="btn btn-danger waves-effect" type="button" onclick="deletePost({{ $post->id }})">
                                             <i class="material-icons">delete</i>
                                         </button>
 
-                                        <form id="delete-form-{{$post->id}}" action="{{ route('admin.post.destroy', $post->id) }}" method="post" style="display:none;">
+                                        <form id="delete-form-{{$post->id}}" action="{{ route('author.post.destroy', $post->id) }}" method="post" style="display:none;">
                                         @csrf 
                                         @method('DELETE')
                                         </form>
